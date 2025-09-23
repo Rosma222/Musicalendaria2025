@@ -1,0 +1,114 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Iniciar Sesión</title>
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+
+    <body class="w3-display-container">
+        <div class="background-gradient"></div>
+
+        <div class="main-container">
+            <div class="info-container">
+                <img src="img/logo.jpg" alt="Logo" class="w3-circle" style="width:300px; height:300px;">   
+                <h1 class= "w3-text-indigo"><b>Musicalendaria</h1></b>
+                <p><b><i>Cartelera y promoción online de plataformas musicales y calendario de presentaciones en vivo</p></b></i>
+            </div>
+            <div class="login-container w3-card-4 w3-animate-opacity">
+                <div class="w3-center">
+                    <img src="img/logo.jpg" alt="Logo" class="w3-circle" style="width:100px; height:100px;">
+                </div>
+
+                <center><h2 class="w3-text-indigo"><b>Iniciar Sesión</b></h2></center>
+
+                <form id="loginForm" class="w3-container">
+                    <div class="w3-section">
+                        <label class="w3-text-blue"><b>Correo electrónico</b></label>
+                        <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                               type="email" id="email" name="email" required
+                               placeholder="tucorreo@ejemplo.com">
+
+                        <label class="w3-text-blue"><b>Contraseña</b></label>
+                        <input class="w3-input w3-border w3-round-large"
+                               type="password" id="password" name="password" required
+                               placeholder="••••••••">
+
+                        <button class="w3-button w3-block w3-blue w3-round-large w3-padding w3-margin-top"
+                                type="submit">Ingresar</button>
+                    </div>
+                </form>
+
+                <div class="w3-center w3-margin-top">
+                                    <!--OPCIONES DE REGISTRO ADMIN O ARTIST -->
+                    <p class="w3-text-black">¿No tenés cuenta?
+                      <a href="#" onclick="mostrarOpcionesRegistro()" class="w3-text-light-blue">Registrate acá</a>
+                    </p>
+                    <div id="opciones-registro" style="display:none; margin-top:10px;">
+                      <button class="w3-button w3-blue w3-round-large" onclick="window.location.href='registro.html'">Artista</button>
+                      <button class="w3-button w3-indigo w3-round-large" onclick="window.location.href='registro-admin.html'">Administrador</button>
+                    </div>
+                    <p id="respuesta" class="w3-panel w3-round-large"></p> 
+                    <script>
+                    function mostrarOpcionesRegistro() {
+                      document.getElementById("opciones-registro").style.display = "block";
+                    }
+                    </script>
+
+        <script>
+            // Escucha el evento de envío del formulario
+            document.getElementById("loginForm").addEventListener("submit", function(e) {
+                e.preventDefault(); // Evita que el formulario se envíe por defecto (con recarga de página)
+
+                // Recogemos los datos del formulario
+                const formData = new FormData(this); // Contiene los datos como pares clave/valor
+                const datos = Object.fromEntries(formData.entries()); // Los convertimos a objeto plano
+
+                // Hacemos la solicitud POST al backend
+                fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json" // Indicamos que los datos están en formato JSON
+                    },
+                    body: JSON.stringify(datos) // Convertimos los datos a JSON
+                })
+                .then(res => res.json()) // Convertimos la respuesta a JSON
+                .then(data => {
+                    const respuestaDiv = document.getElementById("respuesta"); // Obtener el div de respuesta
+                    if (data.token) {
+                        // Si recibimos un token, guardarlo en Session Storage
+                        sessionStorage.setItem("token", data.token);
+
+                        // Mostrar mensaje de éxito
+                        respuestaDiv.innerText = "Login exitoso ✅";
+                        respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+
+                        // Redirecciona a la pagina ADMIN-PANEL o PANEL segun el rol
+                        setTimeout(() => {
+                            if (data.rol === "admin") {
+                                window.location.href = "admin-panel.html";
+                            } else {
+                                window.location.href = "panel.html";
+                            }
+                        }, 1000);
+                    } else {
+                        respuestaDiv.innerText = data.error || "Credenciales inválidas. Intenta de nuevo."; 
+                        respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+                    }
+                })
+                .catch(err => {
+                    // Si ocurre un error (servidor apagado, URL incorrecta, etc.)
+                    console.error(err);
+                    const respuestaDiv = document.getElementById("respuesta");
+                    respuestaDiv.innerText = "Error de conexión con el servidor. Asegúrate de que el servidor esté corriendo.";
+                    respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+                });
+            });
+        </script>
+    </body>
+    </html>
+    

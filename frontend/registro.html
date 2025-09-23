@@ -1,0 +1,119 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Registro</title>
+      <!-- Agrega el icono de la pestaña -->
+      <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+      <!-- Estilos -->
+      <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+      <link rel="stylesheet" href="css/styles.css" />
+
+
+    </head>
+    <body class="w3-display-container">
+      <div class="background-gradient"></div> <!-- Fondo con degradado de azules -->
+      <div class="login-container w3-card-4 w3-animate-opacity">
+
+        <!-- Logo -->
+        <div class="w3-center">
+          <img src="img/logo.jpg" alt="Logo" class="w3-circle" style="width:100px; height:100px;">
+        </div>
+
+        <center><h2 class="w3-text-indigo"><b>Musicalendaria</b></h2>
+        <h3 class="w3-text-indigo"><b>Registrate como Artista</b></h3></center>
+
+        <!-- Formulario de registro manejado con JavaScript -->
+        <form id="registroForm" class="w3-container">
+          <div class="w3-section">
+            <label class="w3-text-blue"><b>Nombre:</b></label>
+            <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                   type="text" id="nombre" name="nombre" required
+                   placeholder="Tu nombre">
+
+            <label class="w3-text-blue"><b>Correo electrónico:</b></label>
+            <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                   type="email" id="email" name="email" required
+                   placeholder="tucorreo@ejemplo.com">
+
+            <label class="w3-text-blue"><b>Contraseña:</b></label>
+            <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                   type="password" id="password" name="password" required
+                   placeholder="••••••••">
+
+            <label class="w3-text-blue"><b>Teléfono:</b></label>
+            <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                   type="text" id="telefono" name="telefono" required
+                   placeholder="Tu teléfono">
+
+            <label class="w3-text-blue"><b>URL de Foto de Perfil:</b></label>
+            <input class="w3-input w3-border w3-round-large w3-margin-bottom"
+                   type="text" id="foto_url" name="foto_url"
+                   placeholder="URL de tu foto (opcional)">
+
+            <button class="w3-button w3-block w3-blue w3-round-large w3-padding w3-margin-top"
+                    type="submit">Registrarse</button>
+          </div>
+        </form>
+
+        <div class="w3-center w3-margin-top">
+          <p class="w3-text-black">¿Ya tenés cuenta?
+            <a href="login.html" class="w3-text-light-blue">Iniciar sesión</a>
+          </p>
+          <!-- Mensaje de respuesta -->
+          <p id="respuesta" class="w3-panel w3-round-large"></p>
+        </div>
+      </div>
+
+      <script>
+        // Manejar el envío del formulario
+        document.getElementById("registroForm").addEventListener("submit", function(e) {
+          e.preventDefault();
+
+          // Tomar los datos del formulario y convertirlos en objeto
+          const formData = new FormData(this);
+          const datos = Object.fromEntries(formData.entries());
+
+          const artista = {
+            nombre: datos.nombre,
+            email: datos.email,
+            password: datos.password,
+            telefono: datos.telefono,
+            foto_url: datos.foto_url,
+            rol: "artista" // Aseguramos que el rol sea 'artista'
+          };
+
+          // Enviar al backend para registrar al artista
+          fetch("http://localhost:3000/registro", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(artista)
+          })
+          .then(res => res.json())
+          .then(data => {
+            const respuestaDiv = document.getElementById("respuesta");
+            if (data.mensaje) {
+              respuestaDiv.innerText = "🎉 " + data.mensaje + " Redirigiendo al login...";
+              respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+              this.reset(); // Limpiar formulario
+              setTimeout(() => {
+                window.location.href = "login.html"; // Redirigir al login después de un mensaje
+              }, 2000);
+            } else {
+              respuestaDiv.innerText = "⚠️ " + (data.error || "Error al registrar.");
+              respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            const respuestaDiv = document.getElementById("respuesta");
+            respuestaDiv.innerText = "❌ Error de conexión con el servidor. Asegúrate de que el servidor esté corriendo.";
+            respuestaDiv.style.display = "block"; // Hacer visible el div de respuesta
+          });
+        });
+      </script>
+    </body>
+    </html>
+    

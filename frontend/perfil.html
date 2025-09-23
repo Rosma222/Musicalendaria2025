@@ -1,0 +1,39 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Perfil del Artista</title>
+    </head>
+    <body>
+      <h1>🎧 Perfil del Artista</h1>
+      <div id="datosPerfil"></div>
+
+      <script>
+        const token = sessionStorage.getItem("token");
+
+        fetch("http://localhost:3000/api/artista/perfil", { // Cambiada la URL
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data) { // No siempre viene data.artista, a veces es el objeto directamente
+            document.getElementById("datosPerfil").innerHTML = `
+              <p><strong>Nombre:</strong> ${data.nombre}</p>
+              <p><strong>Email:</strong> ${data.email}</p>
+              <p><strong>Teléfono:</strong> ${data.telefono}</p>
+              <p><strong>Foto:</strong> <a href="${data.foto_url}" target="_blank">Ver foto</a></p>
+            `;
+          } else {
+            document.getElementById("datosPerfil").innerText = data.error || "No autorizado o perfil no encontrado.";
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById("datosPerfil").innerText = "Error al cargar perfil.";
+        });
+      </script>
+    </body>
+    </html>
+    
