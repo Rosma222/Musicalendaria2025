@@ -1,39 +1,177 @@
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8" />
-      <title>Perfil del Artista</title>
-    </head>
-    <body>
-      <h1>🎧 Perfil del Artista</h1>
-      <div id="datosPerfil"></div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil del Artista</title>
 
-      <script>
-        const token = sessionStorage.getItem("token");
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+  <link rel="stylesheet" href="css/styles.css">
+</head>
 
-        fetch("http://localhost:3000/api/artista/perfil", { // Cambiada la URL
-          headers: {
-            Authorization: "Bearer " + token
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data) { // No siempre viene data.artista, a veces es el objeto directamente
-            document.getElementById("datosPerfil").innerHTML = `
-              <p><strong>Nombre:</strong> ${data.nombre}</p>
-              <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Teléfono:</strong> ${data.telefono}</p>
-              <p><strong>Foto:</strong> <a href="${data.foto_url}" target="_blank">Ver foto</a></p>
-            `;
-          } else {
-            document.getElementById("datosPerfil").innerText = data.error || "No autorizado o perfil no encontrado.";
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          document.getElementById("datosPerfil").innerText = "Error al cargar perfil.";
-        });
-      </script>
-    </body>
-    </html>
+<body>
+  <div class="background-gradient"></div>
+
+  <main>
+    <div class="info-container">
+      <div class="w3-center">
+        <img src="img/logoMusicalendaria.jpg" alt="LogoMusicalendaria" class="w3-circle" style="width:100px; height:100px;">
+      </div>
+      <center><h1 class="w3-text-indigo"><b>Musicalendaria</b></h1></center>
+      <p><b><i>🎵 Tu perfil artístico 🎵</p></b></i>
+    </div>
+
+    <section id="perfil">
+      <div class="panel-container">
+        <h2><b>🎙️ Perfil Personal</b></h2>
+        <div id="datosPerfil" class="w3-container"></div>
+      </div>
+    </section>
+
+    <section id="portfolio">
+      <div class="panel-container">
+        <h2><b>🌐 Sitio Web / Portfolio</b></h2>
+        <div id="datosPortfolio" class="w3-container"></div>
+      </div>
+    </section>
+
+    <section id="plataformas">
+      <div class="panel-container">
+        <h2><b>🎧 Plataformas de Streaming</b></h2>
+        <div id="datosPlataformas" class="w3-container"></div>
+      </div>
+    </section>
+
+    <section id="redes">
+      <div class="panel-container">
+        <h2><b>📺 Canal de YouTube / 📸 Instagram</b></h2>
+        <div id="datosRedes" class="w3-container"></div>
+      </div>
+    </section>
+
+    <section id="eventos">
+      <div class="panel-container">
+        <h2><b>📅 Próximas Presentaciones</b></h2>
+        <div id="datosEventos" class="w3-container"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    // Función para mostrar datos
+    function mostrarDatos(elementId, data, template) {
+      const element = document.getElementById(elementId);
+      if (data && Object.keys(data).length > 0) {
+        element.innerHTML = template(data);
+      } else {
+        element.innerHTML = "<p>No hay información disponible.</p>";
+      }
+    }
+
+    // Perfil personal
+    fetch("http://localhost:3000/api/artista/perfil", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.nombre) {
+        mostrarDatos("datosPerfil", data, (d) => `
+          <p><strong>Nombre:</strong> ${d.nombre || 'No especificado'}</p>
+          <p><strong>Email:</strong> ${d.email || 'No especificado'}</p>
+          <p><strong>Teléfono:</strong> ${d.telefono || 'No especificado'}</p>
+          ${d.foto_url ? `<p><strong>Foto:</strong> <a href="${d.foto_url}" target="_blank">Ver foto</a></p>` : ''}
+        `);
+      } else {
+        document.getElementById("datosPerfil").innerText = data.error || "No autorizado o perfil no encontrado.";
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("datosPerfil").innerText = "Error al cargar perfil.";
+    });
+
+    // Portfolio
+    fetch("http://localhost:3000/api/artista/portfolio", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      mostrarDatos("datosPortfolio", data, (d) => `
+        ${d.url ? `<p><strong>Sitio web:</strong> <a href="${d.url}" target="_blank">${d.url}</a></p>` : '<p>No hay sitio web registrado.</p>'}
+      `);
+    })
+    .catch(() => {
+      document.getElementById("datosPortfolio").innerText = "Error al cargar portfolio.";
+    });
+
+    // Plataformas
+    fetch("http://localhost:3000/api/artista/plataformas", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      mostrarDatos("datosPlataformas", data, (d) => `
+        ${d.spotify ? `<p><strong>Spotify:</strong> <a href="${d.spotify}" target="_blank">${d.spotify}</a></p>` : ''}
+        ${d.apple ? `<p><strong>Apple Music:</strong> <a href="${d.apple}" target="_blank">${d.apple}</a></p>` : ''}
+        ${d.tidal ? `<p><strong>Tidal:</strong> <a href="${d.tidal}" target="_blank">${d.tidal}</a></p>` : ''}
+        ${d.ytmusic ? `<p><strong>YouTube Music:</strong> <a href="${d.ytmusic}" target="_blank">${d.ytmusic}</a></p>` : ''}
+        ${!d.spotify && !d.apple && !d.tidal && !d.ytmusic ? '<p>No hay plataformas registradas.</p>' : ''}
+      `);
+    })
+    .catch(() => {
+      document.getElementById("datosPlataformas").innerText = "Error al cargar plataformas.";
+    });
+
+    // Redes
+    fetch("http://localhost:3000/api/artista/redes", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      mostrarDatos("datosRedes", data, (d) => `
+        ${d.youtube ? `<p><strong>YouTube:</strong> <a href="${d.youtube}" target="_blank">${d.youtube}</a></p>` : ''}
+        ${d.instagram ? `<p><strong>Instagram:</strong> <a href="${d.instagram}" target="_blank">${d.instagram}</a></p>` : ''}
+        ${!d.youtube && !d.instagram ? '<p>No hay redes registradas.</p>' : ''}
+      `);
+    })
+    .catch(() => {
+      document.getElementById("datosRedes").innerText = "Error al cargar redes.";
+    });
+
+    // Eventos
+    fetch("http://localhost:3000/api/artista/eventos", {
+      headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        const eventosHtml = data.map(evento => `
+          <div class="event-card">
+            <h3>${evento.lugar}</h3>
+            <div class="event-info">
+              <p><strong>Fecha:</strong> ${new Date(evento.fecha).toLocaleString()}</p>
+              <p><strong>Modalidad:</strong> ${evento.modalidad}</p>
+              <p><strong>Precio:</strong> $${evento.precio}</p>
+              ${evento.link_entradas ? `<p><strong>Entradas:</strong> <a href="${evento.link_entradas}" target="_blank">Comprar</a></p>` : ''}
+            </div>
+            ${evento.flyer ? `<img src="${evento.flyer}" alt="Flyer" style="width:100%; max-width:300px;">` : ''}
+          </div>
+        `).join('');
+        document.getElementById("datosEventos").innerHTML = eventosHtml;
+      } else {
+        document.getElementById("datosEventos").innerHTML = "<p>No hay presentaciones próximas.</p>";
+      }
+    })
+    .catch(() => {
+      document.getElementById("datosEventos").innerText = "Error al cargar eventos.";
+    });
+  </script>
+</body>
+</html>
     

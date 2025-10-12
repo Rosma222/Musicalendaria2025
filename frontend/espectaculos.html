@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Musicalendaria</title>
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <div class="background-gradient"></div>
+
+  <header>
+    <a href="login.html" class="login-link">Iniciar Sesión</a>
+  </header>
+
+  <main>
+    <div class="info-container">
+      <div class="w3-center">
+        <img src="img/logoMusicalendaria.jpg" alt="LogoMusicalendaria" class="w3-circle" style="width:100px; height:100px;">
+   
+    </div> 
+      <center><h1 class="w3-text-indigo"><b>Musicalendaria</b></h1></center>
+      <p><b><i>🎵 Descubrí los mejores espectáculos en vivo 🎵</p></b></i>
+    </div>
+
+    <section id="espectaculos">
+      <div class="panel-container">
+        <h2><b>🎭 Cartelera de Espectáculos</h2></b>
+        <div id="eventos-lista" class="eventos-grid">
+          <!-- Los eventos se cargan aca con JS -->
+           <script src="js/espectaculos.js"></script>
+          <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Cargando espectáculos...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+ </body>
+</html>

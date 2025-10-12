@@ -30,6 +30,9 @@ router.get("/artista/redes", auth(), artistaController.obtenerRedes);
 router.post("/artista/eventos", auth(), artistaController.crearEvento);
 router.get("/artista/eventos", auth(), artistaController.obtenerEventos);
 
+// Ruta pública para obtener todos los espectáculos (para el frontend)
+router.get("/espectaculos", artistaController.obtenerTodosLosEventos);
+
 
     module.exports = router;
     

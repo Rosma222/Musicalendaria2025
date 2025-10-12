@@ -134,9 +134,7 @@
         }
       );
     };
-//const data = {
-//...data de la api, 
-//precio: data.precio? parseInt(data.precio) : null}// para que no falle si es null
+
 
     const obtenerEventos = (req, res) => {
       const usuarioId = req.user.id;
@@ -150,6 +148,31 @@
       );
     };
 
+    // Obtener todos los eventos públicos (sin autenticación)
+const obtenerTodosLosEventos = (req, res) => {
+  const sql = `
+    SELECT
+      e.flyer AS flyer_url,
+      e.fecha,
+      u.nombre AS artista,
+      e.lugar,
+      e.modalidad,
+      e.precio,
+      e.link_entradas
+    FROM eventos e
+    JOIN usuarios u ON e.usuario_id = u.id
+    WHERE e.fecha >= CURDATE()
+    ORDER BY e.fecha ASC
+  `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener todos los eventos:", err);
+      return res.status(500).json({ error: "Error al cargar los espectáculos" });
+    }
+    res.json(results);
+  });
+};
+
     module.exports = {
       obtenerPerfil,
       actualizarPerfil,
@@ -160,5 +183,6 @@
       guardarRedes,
       obtenerRedes,
       crearEvento,
-      obtenerEventos
+      obtenerEventos,
+      obtenerTodosLosEventos
     };

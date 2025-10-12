@@ -12,6 +12,8 @@
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
 
+    app.use(express.static('frontend'));
+
     app.use("/", appRoutes);
     app.use("/api", artistaRoutes); // Montar rutas de artista bajo /api para coincidir con las llamadas del frontend
 
@@ -19,3 +21,4 @@
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
     
+   

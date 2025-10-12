@@ -17,7 +17,7 @@
 
     <!--  Logo  -->
   <div class="w3-center">
-        <img src="img/logo.jpg" alt="Logo" class="w3-circle" style="width:100px; height:100px;">
+        <img src="img/logoMusicalendaria.jpg" alt="LogoMusicalendaria" class="w3-circle" style="width:100px; height:100px;">
    </div> 
     
     <!-- Formulario datos panel del artista -->
@@ -37,7 +37,7 @@
         <input class="w3-input w3-border w3-round-large"
                type="text" name="nombre" />
 
-        <label>Foto (URL Google Drive):</label>
+        <label>Foto (URL):</label>
         <input class="w3-input w3-border w3-round-large"
                type="text" name="foto_url" />
 
@@ -125,12 +125,22 @@
         <label>Enlace a venta de entradas (opcional):</label>
         <input class="w3-input w3-border w3-round-large" type="url" name="link_entradas" />
 
-        <label>Flyer (URL Google Drive):</label>
+        <label>Flyer (URL):</label>
         <input class="w3-input w3-border w3-round-large" type="url" name="flyer" />
 
         <button class="w3-button w3-blue w3-round-large w3-padding w3-margin-top"
                 type="submit">Agregar Evento</button>
       </form>
+    </section>
+
+    <!-- Sección para visitar perfil completo -->
+    <section id="perfil-completo">
+      <div class="w3-container w3-center w3-margin-top">
+        <h2><b>👤 Tu Perfil Completo</b></h2>
+        <p>Revisa toda tu información artística en un solo lugar.</p>
+        <button class="w3-button w3-indigo w3-round-large w3-padding w3-margin-top"
+                onclick="window.location.href='perfil.html'">Visitar</button>
+      </div>
     </section>
   </div>
 
