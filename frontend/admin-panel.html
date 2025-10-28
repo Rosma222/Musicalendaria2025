@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Administrador</title>
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="css/w3.css">
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body class="w3-display-container">
@@ -15,9 +15,12 @@
     </div>
     <center><h2 class="w3-text-indigo"><b>Panel de Administrador</b></h2></center>
     <div class="w3-container w3-margin-top">
-      <p>Bienvenido/a, administrador/a.</p>
-      <p>Aquí podrás gestionar usuarios, artistas y otras funciones administrativas.</p>
-      <!-- Agrega aquí las funciones que desees para el admin -->
+      <p><b> Bienvenid@ administrador !! </p></b>
+      <p><b>Aquí podrás gestionar usuarios y artistas 📝</p></b>
+
+      <h3 class="w3-text-indigo"><b>Gestión de Artistas</b></h3>
+      <button class="w3-button w3-blue w3-round-large" onclick="cargarArtistas()">Cargar Lista de Artistas</button>
+      <div id="artistas-list" class="w3-margin-top"></div>
     </div>
     <div class="w3-center w3-margin-top">
       <button class="w3-button w3-red w3-round-large" onclick="logout()">Cerrar sesión</button>
@@ -27,6 +30,92 @@
     function logout() {
       sessionStorage.removeItem("token");
       window.location.href = "login.html";
+    }
+
+    async function cargarArtistas() {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        alert("No estás autenticado");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:3000/api/artistas", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          const artistas = await response.json();
+          mostrarArtistas(artistas);
+        } else {
+          const errorData = await response.json().catch(() => ({ error: "Error desconocido" }));
+          alert(`Error al cargar artistas: ${response.status} - ${errorData.error}`);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al cargar artistas");
+      }
+    }
+
+    function mostrarArtistas(artistas) {
+      const container = document.getElementById("artistas-list");
+      if (artistas.length === 0) {
+        container.innerHTML = "<p>No hay artistas registrados.</p>";
+        return;
+      }
+
+      let html = "<ul class='w3-ul w3-border'>";
+      artistas.forEach(artista => {
+        html += `
+          <li class="w3-bar">
+            <img src="${artista.foto_url || 'img/default-avatar.png'}" class="w3-bar-item w3-circle w3-hide-small" style="width:85px">
+            <div class="w3-bar-item">
+              <span class="w3-large">${artista.nombre}</span><br>
+              <span>${artista.email}</span><br>
+              <span>${artista.telefono || 'Sin teléfono'}</span>
+            </div>
+            <button class="w3-button w3-red w3-round-large w3-right" onclick="eliminarArtista(${artista.id}, '${artista.nombre}')">Eliminar</button>
+          </li>
+        `;
+      });
+      html += "</ul>";
+      container.innerHTML = html;
+    }
+
+    async function eliminarArtista(id, nombre) {
+      if (!confirm(`¿Estás seguro de que quieres eliminar al artista "${nombre}"? Esta acción no se puede deshacer.`)) {
+        return;
+      }
+
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        alert("No estás autenticado");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/artista/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          alert("Artista eliminado correctamente");
+          cargarArtistas(); // Recargar la lista
+        } else {
+          alert("Error al eliminar artista");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al eliminar artista");
+      }
     }
   </script>
 </body>

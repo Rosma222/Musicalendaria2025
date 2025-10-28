@@ -33,6 +33,10 @@ router.get("/artista/eventos", auth(), artistaController.obtenerEventos);
 // Ruta pública para obtener todos los espectáculos (para el frontend)
 router.get("/espectaculos", artistaController.obtenerTodosLosEventos);
 
+// Rutas para admin
+router.get("/artistas", auth(["admin"]), artistaController.obtenerTodosLosArtistas);
+router.delete("/artista/:id", auth(["admin"]), artistaController.eliminarArtista);
+
 
     module.exports = router;
     

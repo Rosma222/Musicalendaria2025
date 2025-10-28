@@ -2,7 +2,6 @@
 body, html {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
   overflow-y: auto; /* Permite el scroll vertical */
   height: auto;
@@ -21,18 +20,11 @@ body, html {
   z-index: -1; /* Asegura que el fondo esté detrás de otros elementos */
   will-change: transform; /* Optimiza el renderizado */
   backface-visibility: hidden; /* Evita parpadeos en algunos dispositivos */
-}
-
-/* --- Animación del degradado --- */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.background-gradient {
   background-size: 200% 200%;
   animation: gradientShift 10s ease infinite;
 }
+
+
 
 h1, h2, h3 {
   color: #3F51B5;
@@ -164,10 +156,7 @@ header h1 {
   margin-bottom: 5px;
 }
 
-#espectaculos h2 {
-  font-size: 14px;
-  margin-bottom: 5px;
-}
+
 
 /* --- Tarjetas de Eventos  --- */
 .event-card {
@@ -184,16 +173,6 @@ header h1 {
   position: relative;
   overflow: hidden;
 }
-/*
-.event-card::before {
-  content: '';
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #1e3c72, #2a5298, #7db9e8);
-}*/
 
 .event-card:hover {
   transform: translateY(-5px);
@@ -233,7 +212,6 @@ header h1 {
 
 .event-card .event-info p {
   margin: 1px; 
-  font-size: 5px; 
   color: #555;
   display: flex;
   align-items: center;

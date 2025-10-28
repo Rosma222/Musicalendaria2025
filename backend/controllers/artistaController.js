@@ -1,176 +1,168 @@
 // backend/controllers/artistaController.js
     //funciones para manejar la lógica de cada endpoint
 
-    const db = require("../models/app");
-    const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
+const {
+  obtenerPerfil: queryObtenerPerfil,
+  actualizarPerfil: queryActualizarPerfil,
+  obtenerTodosLosArtistas: queryObtenerTodosLosArtistas,
+  eliminarArtista: queryEliminarArtista
+} = require("../queries/usuarioQueries");
+const { guardarPortfolio: queryGuardarPortfolio, obtenerPortfolio: queryObtenerPortfolio } = require("../queries/portfolioQueries");
+const { guardarPlataformas: queryGuardarPlataformas, obtenerPlataformas: queryObtenerPlataformas } = require("../queries/plataformasQueries");
+const { guardarRedes: queryGuardarRedes, obtenerRedes: queryObtenerRedes } = require("../queries/redesQueries");
+const { crearEvento: queryCrearEvento, obtenerEventos: queryObtenerEventos, obtenerTodosLosEventos: queryObtenerTodosLosEventos } = require("../queries/eventosQueries");
 
     // Obtener datos del perfil del artista logueado
-    const obtenerPerfil = (req, res) => {
-      const artistaId = req.user.id;
-
-      // 'usuarios'
-      const sql = "SELECT nombre, email, telefono, foto_url FROM usuarios WHERE id = ?";
-      db.query(sql, [artistaId], (err, results) => {
-        if (err) {
-          console.error("Error al obtener perfil:", err); // para depuración
-          return res.status(500).json({ error: "Error al obtener perfil" });
-        }
-        if (results.length === 0) {
+    const obtenerPerfil = async (req, res) => {
+      try {
+        const artistaId = req.user.id;
+        const perfil = await queryObtenerPerfil(artistaId);
+        if (!perfil) {
           return res.status(404).json({ error: "Usuario no encontrado." });
         }
-        res.json(results[0]);
-      });
+        res.json(perfil);
+      } catch (err) {
+        console.error("Error al obtener perfil:", err);
+        res.status(500).json({ error: "Error al obtener perfil" });
+      }
     };
 
     // Actualizar información personal del artista
-    const actualizarPerfil = (req, res) => {
-      const artistaId = req.user.id;
-      const { nombre, email, telefono, foto_url } = req.body;
-      const sql = "UPDATE usuarios SET nombre = ?, email = ?, telefono = ?, foto_url = ? WHERE id = ?";
-      db.query(sql, [nombre, email, telefono, foto_url, artistaId], (err, result) => {
-        if (err) {
-          console.error("Error al actualizar perfil:", err); // Agregado para depuración
-          return res.status(500).json({ error: "Error al actualizar perfil" });
-        }
+    const actualizarPerfil = async (req, res) => {
+      try {
+        const artistaId = req.user.id;
+        const { nombre, email, telefono, foto_url } = req.body;
+        await queryActualizarPerfil(artistaId, { nombre, email, telefono, foto_url });
         res.json({ mensaje: "Perfil actualizado correctamente" });
-      });
+      } catch (err) {
+        console.error("Error al actualizar perfil:", err);
+        res.status(500).json({ error: "Error al actualizar perfil" });
+      }
     };
 
     // Portfolio
-    const guardarPortfolio = (req, res) => {
-      const usuarioId = req.user.id;
-      const { url } = req.body;
-      db.query(
-        "INSERT INTO portfolio (usuario_id, url) VALUES (?, ?) ON DUPLICATE KEY UPDATE url = VALUES(url)",
-        [usuarioId, url],
-        (err) => {
-          if (err) return res.status(500).json({ error: "Error al guardar portfolio" });
-          res.json({ mensaje: "Portfolio guardado correctamente" });
-        }
-      );
+    const guardarPortfolio = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const { url } = req.body;
+        await queryGuardarPortfolio(usuarioId, url);
+        res.json({ mensaje: "Portfolio guardado correctamente" });
+      } catch (err) {
+        res.status(500).json({ error: "Error al guardar portfolio" });
+      }
     };
 
-    const obtenerPortfolio = (req, res) => {
-      const usuarioId = req.user.id;
-      db.query(
-        "SELECT url FROM portfolio WHERE usuario_id = ?",
-        [usuarioId],
-        (err, results) => {
-          if (err) return res.status(500).json({ error: "Error al obtener portfolio" });
-          res.json(results[0] || {});
-        }
-      );
+    const obtenerPortfolio = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const portfolio = await queryObtenerPortfolio(usuarioId);
+        res.json(portfolio);
+      } catch (err) {
+        res.status(500).json({ error: "Error al obtener portfolio" });
+      }
     };
 
     // Plataformas
-    const guardarPlataformas = (req, res) => {
-      const usuarioId = req.user.id;
-      const { spotify, apple, tidal, ytmusic } = req.body;
-      db.query(
-        `INSERT INTO plataformas (usuario_id, spotify, apple, tidal, ytmusic)
-         VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE spotify=VALUES(spotify), apple=VALUES(apple), tidal=VALUES(tidal), ytmusic=VALUES(ytmusic)`,
-        [usuarioId, spotify, apple, tidal, ytmusic],
-        (err) => {
-          if (err) return res.status(500).json({ error: "Error al guardar plataformas" });
-          res.json({ mensaje: "Plataformas guardadas correctamente" });
-        }
-      );
+    const guardarPlataformas = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const { spotify, apple, tidal, ytmusic } = req.body;
+        await queryGuardarPlataformas(usuarioId, { spotify, apple, tidal, ytmusic });
+        res.json({ mensaje: "Plataformas guardadas correctamente" });
+      } catch (err) {
+        res.status(500).json({ error: "Error al guardar plataformas" });
+      }
     };
 
-    const obtenerPlataformas = (req, res) => {
-      const usuarioId = req.user.id;
-      db.query(
-        "SELECT spotify, apple, tidal, ytmusic FROM plataformas WHERE usuario_id = ?",
-        [usuarioId],
-        (err, results) => {
-          if (err) return res.status(500).json({ error: "Error al obtener plataformas" });
-          res.json(results[0] || {});
-        }
-      );
+    const obtenerPlataformas = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const plataformas = await queryObtenerPlataformas(usuarioId);
+        res.json(plataformas);
+      } catch (err) {
+        res.status(500).json({ error: "Error al obtener plataformas" });
+      }
     };
 
     // Redes
-    const guardarRedes = (req, res) => {
-      const usuarioId = req.user.id;
-      const { youtube, instagram } = req.body;
-      db.query(
-        `INSERT INTO redes (usuario_id, youtube, instagram)
-         VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE youtube=VALUES(youtube), instagram=VALUES(instagram)`,
-        [usuarioId, youtube, instagram],
-        (err) => {
-          if (err) return res.status(500).json({ error: "Error al guardar redes" });
-          res.json({ mensaje: "Redes guardadas correctamente" });
-        }
-      );
+    const guardarRedes = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const { youtube, instagram } = req.body;
+        await queryGuardarRedes(usuarioId, { youtube, instagram });
+        res.json({ mensaje: "Redes guardadas correctamente" });
+      } catch (err) {
+        res.status(500).json({ error: "Error al guardar redes" });
+      }
     };
 
-    const obtenerRedes = (req, res) => {
-      const usuarioId = req.user.id;
-      db.query(
-        "SELECT youtube, instagram FROM redes WHERE usuario_id = ?",
-        [usuarioId],
-        (err, results) => {
-          if (err) return res.status(500).json({ error: "Error al obtener redes" });
-          res.json(results[0] || {});
-        }
-      );
+    const obtenerRedes = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const redes = await queryObtenerRedes(usuarioId);
+        res.json(redes);
+      } catch (err) {
+        res.status(500).json({ error: "Error al obtener redes" });
+      }
     };
 
     // Eventos
-    const crearEvento = (req, res) => {
-      const usuarioId = req.user.id;
-      const { fecha, lugar, modalidad, precio, link_entradas, flyer } = req.body;
-      console.log("Crear evento llamado con datos:", req.body); // Para depuración
-      console.log("Usuario ID:", usuarioId); // Para depuración
-      db.query(
-        `INSERT INTO eventos (usuario_id, fecha, lugar, modalidad, precio, link_entradas, flyer)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [usuarioId, fecha, lugar, modalidad, precio, link_entradas, flyer],
-        (err) => {
-          if (err) return res.status(500).json({ error: "Error al crear evento" });
-          res.json({ mensaje: "Evento creado correctamente" });
-        }
-      );
+    const crearEvento = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const { fecha, lugar, modalidad, precio, link_entradas, flyer } = req.body;
+        console.log("Crear evento llamado con datos:", req.body); // Para depuración
+        console.log("Usuario ID:", usuarioId); // Para depuración
+        await queryCrearEvento(usuarioId, { fecha, lugar, modalidad, precio, link_entradas, flyer });
+        res.json({ mensaje: "Evento creado correctamente" });
+      } catch (err) {
+        res.status(500).json({ error: "Error al crear evento" });
+      }
     };
 
-
-    const obtenerEventos = (req, res) => {
-      const usuarioId = req.user.id;
-      db.query(
-        "SELECT id, fecha, lugar, modalidad, precio, link_entradas, flyer FROM eventos WHERE usuario_id = ? ORDER BY fecha DESC",
-        [usuarioId],
-        (err, results) => {
-          if (err) return res.status(500).json({ error: "Error al obtener eventos" });
-          res.json(results);
-        }
-      );
+    const obtenerEventos = async (req, res) => {
+      try {
+        const usuarioId = req.user.id;
+        const eventos = await queryObtenerEventos(usuarioId);
+        res.json(eventos);
+      } catch (err) {
+        res.status(500).json({ error: "Error al obtener eventos" });
+      }
     };
 
     // Obtener todos los eventos públicos (sin autenticación)
-const obtenerTodosLosEventos = (req, res) => {
-  const sql = `
-    SELECT
-      e.flyer AS flyer_url,
-      e.fecha,
-      u.nombre AS artista,
-      e.lugar,
-      e.modalidad,
-      e.precio,
-      e.link_entradas
-    FROM eventos e
-    JOIN usuarios u ON e.usuario_id = u.id
-    WHERE e.fecha >= CURDATE()
-    ORDER BY e.fecha ASC
-  `;
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error("Error al obtener todos los eventos:", err);
-      return res.status(500).json({ error: "Error al cargar los espectáculos" });
-    }
-    res.json(results);
-  });
+    const obtenerTodosLosEventos = async (req, res) => {
+      try {
+        const eventos = await queryObtenerTodosLosEventos();
+        res.json(eventos);
+      } catch (err) {
+        console.error("Error al obtener todos los eventos:", err);
+        res.status(500).json({ error: "Error al cargar los espectáculos" });
+      }
+    };
+
+// Obtener todos los artistas (solo para admin)
+const obtenerTodosLosArtistas = async (req, res) => {
+  try {
+    const artistas = await queryObtenerTodosLosArtistas();
+    res.json(artistas);
+  } catch (err) {
+    console.error("Error al obtener artistas:", err);
+    res.status(500).json({ error: "Error al obtener artistas" });
+  }
+};
+
+// Eliminar artista (solo para admin)
+const eliminarArtista = async (req, res) => {
+  try {
+    const artistaId = req.params.id;
+    await queryEliminarArtista(artistaId);
+    res.json({ mensaje: "Artista eliminado correctamente" });
+  } catch (err) {
+    console.error("Error al eliminar artista:", err);
+    res.status(500).json({ error: "Error al eliminar artista" });
+  }
 };
 
     module.exports = {
@@ -184,5 +176,7 @@ const obtenerTodosLosEventos = (req, res) => {
       obtenerRedes,
       crearEvento,
       obtenerEventos,
-      obtenerTodosLosEventos
+      obtenerTodosLosEventos,
+      obtenerTodosLosArtistas,
+      eliminarArtista
     };
